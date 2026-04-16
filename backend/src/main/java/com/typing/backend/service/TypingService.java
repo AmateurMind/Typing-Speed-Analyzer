@@ -34,19 +34,20 @@ public class TypingService {
         return PROMPTS[random.nextInt(PROMPTS.length)];
     }
 
-    public void saveResult(double speed, double accuracy) {
+    public void saveResult(double speed, double accuracy, String userId) {
         ensureSchema();
         jdbcTemplate.update(
-                "INSERT INTO typing_speed (speed, accuracy, tested_at) VALUES (?, ?, ?)",
+                "INSERT INTO typing_speed (user_id, speed, accuracy, tested_at) VALUES (?, ?, ?, ?)",
+                userId,
                 speed,
                 accuracy,
                 Timestamp.valueOf(LocalDateTime.now()));
     }
 
-    public List<Map<String, Object>> getScores() {
+    public List<Map<String, Object>> getScores(String userId) {
         ensureSchema();
         return jdbcTemplate.query(
-                "SELECT speed, COALESCE(accuracy, 100) AS accuracy, tested_at FROM typing_speed ORDER BY tested_at DESC LIMIT 10",
+                "SELECT speed, COALESCE(accuracy, 100) AS accuracy, tested_at FROM typing_speed WHERE user_id = ? ORDER BY tested_at DESC LIMIT 10",
                 (rs, rowNum) -> {
                     Map<String, Object> row = new HashMap<>();
                     row.put("speed", rs.getDouble("speed"));
@@ -58,13 +59,15 @@ public class TypingService {
                     row.put("timestamp", formattedTimestamp);
                     row.put("date", formattedTimestamp);
                     return row;
-                });
+                },
+                userId);
     }
 
     private void ensureSchema() {
         jdbcTemplate.execute("""
                 CREATE TABLE IF NOT EXISTS typing_speed (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    user_id VARCHAR(120) NOT NULL DEFAULT 'legacy-user',
                     speed DOUBLE NOT NULL,
                     accuracy DOUBLE NULL,
                     tested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -88,6 +91,21 @@ public class TypingService {
 
         try {
             jdbcTemplate.execute("UPDATE typing_speed SET accuracy = 100 WHERE accuracy IS NULL");
+        } catch (Exception ignored) {
+        }
+
+        try {
+            jdbcTemplate.execute("ALTER TABLE typing_speed ADD COLUMN user_id VARCHAR(120) NOT NULL DEFAULT 'legacy-user'");
+        } catch (Exception ignored) {
+        }
+
+        try {
+            jdbcTemplate.execute("UPDATE typing_speed SET user_id = 'legacy-user' WHERE user_id IS NULL OR TRIM(user_id) = ''");
+        } catch (Exception ignored) {
+        }
+
+        try {
+            jdbcTemplate.execute("CREATE INDEX idx_typing_speed_user_time ON typing_speed (user_id, tested_at DESC)");
         } catch (Exception ignored) {
         }
     }

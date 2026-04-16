@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
 })
 
 const sentencePrompts = [
@@ -96,6 +96,15 @@ function buildTimedPrompt(basePrompt) {
   return result.join(' ')
 }
 
+function getOrCreateUserId() {
+  const key = 'typing_speed_user_id'
+  const existing = window.localStorage.getItem(key)
+  if (existing && existing.trim()) return existing
+  const generated = `user-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  window.localStorage.setItem(key, generated)
+  return generated
+}
+
 function App() {
   const canvasRef = useRef(null)
   const inputRef = useRef(null)
@@ -115,6 +124,7 @@ function App() {
   const [accuracy, setAccuracy] = useState(100)
   const [scores, setScores] = useState([])
   const [status, setStatus] = useState('Ready')
+  const userIdRef = useRef('')
 
   const promptWords = useMemo(() => splitWords(prompt), [prompt])
 
@@ -176,7 +186,9 @@ function App() {
 
   const loadScores = useCallback(async () => {
     try {
-      const res = await api.get('/scores')
+      const res = await api.get('/scores', {
+        params: { userId: userIdRef.current },
+      })
       setScores(Array.isArray(res.data) ? res.data : [])
     } catch {
       setScores([])
@@ -206,6 +218,7 @@ function App() {
         await api.post('/result', {
           wpm: Number(finalWpm.toFixed(2)),
           accuracy: Number(finalAccuracy.toFixed(2)),
+          userId: userIdRef.current,
         })
         await loadScores()
 
@@ -285,6 +298,7 @@ function App() {
   }
 
   useEffect(() => {
+    userIdRef.current = getOrCreateUserId()
     resetTest(mode)
     loadScores()
     return () => stopTimers()
