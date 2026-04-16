@@ -135,8 +135,11 @@ public class TypingSpeedCalculator extends JFrame {
             "The quick brown fox jumps over the lazy dog.",
             "The only way to do great work is to love what you do.",
             "In the middle of difficulty lies opportunity.",
-            "Success is not final, failure is not fatal: It is the courage to continue that counts.",
-            "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment."
+            "Actions speak louder than words in most situations.",
+            "A journey of a thousand miles begins today.",
+            "Every cloud has a silver lining if you look.",
+            "Practice makes perfect when learning a new skill.",
+            "Do not count your chickens before they hatch."
         };
         Random random = new Random();
         return prompts[random.nextInt(prompts.length)];
