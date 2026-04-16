@@ -127,7 +127,7 @@ VITE_API_BASE_URL=https://typing-speed-backend-production.up.railway.app
 ```
 
 ### Backend
-- Hosted on Railway
+- Hosted on Railway(https://typing-speed-backend-production.up.railway.app/)
 - Uses `Dockerfile` in `backend/`
 - Uses Railway environment vars for datasource:
   - `SPRING_DATASOURCE_URL`
