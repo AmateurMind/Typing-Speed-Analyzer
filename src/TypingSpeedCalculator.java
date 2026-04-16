@@ -169,7 +169,7 @@ public class TypingSpeedCalculator extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(245, 245, 250));
 
-        showScoresButton = new JButton("📊 View Past Scores");
+        showScoresButton = new JButton("📈 View Previous Scores");
         showScoresButton.setFont(new Font("Arial", Font.BOLD, 14));
         showScoresButton.setBackground(new Color(52, 152, 219));
         showScoresButton.setForeground(Color.WHITE);
@@ -178,7 +178,7 @@ public class TypingSpeedCalculator extends JFrame {
         showScoresButton.setBorder(new EmptyBorder(12, 25, 12, 25));
         showScoresButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
-        restartButton = new JButton("🔄 Restart Test");
+        restartButton = new JButton("↻ Restart Test");
         restartButton.setFont(new Font("Arial", Font.BOLD, 14));
         restartButton.setBackground(new Color(231, 76, 60));
         restartButton.setForeground(Color.WHITE);
