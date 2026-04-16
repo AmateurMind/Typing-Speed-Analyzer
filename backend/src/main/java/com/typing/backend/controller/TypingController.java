@@ -25,6 +25,16 @@ public class TypingController {
         this.typingService = typingService;
     }
 
+    @GetMapping("/")
+    public Map<String, String> home() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Typing Speed Backend API is running");
+        response.put("prompt", "/prompt");
+        response.put("scores", "/scores?userId=<your-user-id>");
+        response.put("result", "POST /result");
+        return response;
+    }
+
     @GetMapping("/prompt")
     public String getPrompt() {
         return typingService.getPrompt();
