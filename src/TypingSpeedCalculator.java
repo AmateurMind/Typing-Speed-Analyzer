@@ -35,7 +35,7 @@ public class TypingSpeedCalculator extends JFrame {
     // Database connection parameters
     private static final String jdbcUrl = "jdbc:mysql://localhost:3306/records";
     private static final String username = "root";
-    private static final String password = "mypassword";
+    private static final String password = "password";
 
     public TypingSpeedCalculator() {
         setTitle("Typing Speed Calculator");
