@@ -34,14 +34,20 @@ public class TypingController {
         Map<String, String> response = new HashMap<>();
 
         try {
-            Object speedValue = data.get("speed");
-            if (!(speedValue instanceof Number)) {
-                response.put("message", "Invalid speed value");
+            Object wpmValue = data.get("wpm");
+            if (!(wpmValue instanceof Number)) {
+                wpmValue = data.get("speed");
+            }
+            Object accuracyValue = data.get("accuracy");
+
+            if (!(wpmValue instanceof Number) || !(accuracyValue instanceof Number)) {
+                response.put("message", "Invalid wpm/accuracy value");
                 return ResponseEntity.badRequest().body(response);
             }
 
-            double speed = ((Number) speedValue).doubleValue();
-            typingService.saveResult(speed);
+            double wpm = ((Number) wpmValue).doubleValue();
+            double accuracy = ((Number) accuracyValue).doubleValue();
+            typingService.saveResult(wpm, accuracy);
             response.put("message", "Saved");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
