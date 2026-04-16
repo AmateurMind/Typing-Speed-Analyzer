@@ -102,44 +102,57 @@ public class TypingSpeedCalculator extends JFrame {
         promptText = generateRandomPrompt();
         promptLabel.setText(promptText);
     }
+
     private void updateElapsedTime() {
         if (testRunning) {
             long currentTime = new Date().getTime();
             long elapsedTime = currentTime - startTime.getTime();
             timeLabel.setText("Time: " + (elapsedTime / 1000) + " seconds");
-    
+
             String typedText = inputTextArea.getText();
             StringTokenizer tokenizer = new StringTokenizer(typedText);
             int wordsTyped = tokenizer.countTokens();
             totalWordsTyped = wordsTyped;
-    
+
             if (elapsedTime >= 15000) {
                 stopTypingTest();
             }
-    
+
             if (totalWordsTyped > 0 && elapsedTime > 0) {
                 double typingSpeed = (double) totalWordsTyped / (elapsedTime / 60000.0); // Calculate WPM
-                resultLabel.setText("Typing Speed: " + String.format("%.2f", typingSpeed) + " WPM");
+                
+                // Calculate Accuracy
+                int correctChars = 0;
+                int minLen = Math.min(typedText.length(), promptText.length());
+                for (int i = 0; i < minLen; i++) {
+                    if (typedText.charAt(i) == promptText.charAt(i)) {
+                        correctChars++;
+                    }
+                }
+                
+                double accuracy = typedText.isEmpty() ? 100.0 : ((double) correctChars / typedText.length()) * 100.0;
+                
+                resultLabel.setText("Typing Speed: " + String.format("%.2f", typingSpeed) + " WPM | Accuracy: " + String.format("%.1f", accuracy) + "%");
             }
-    
+
             if (typedText.equals(promptText)) {
                 stopTypingTest();
             }
         }
     }
-    
+
     // Inside your constructor, update the timer ActionListener as follows:
 
     private String generateRandomPrompt() {
         String[] prompts = {
-            "The quick brown fox jumps over the lazy dog.",
-            "The only way to do great work is to love what you do.",
-            "In the middle of difficulty lies opportunity.",
-            "Actions speak louder than words in most situations.",
-            "A journey of a thousand miles begins today.",
-            "Every cloud has a silver lining if you look.",
-            "Practice makes perfect when learning a new skill.",
-            "Do not count your chickens before they hatch."
+                "The quick brown fox jumps over the lazy dog.",
+                "The only way to do great work is to love what you do.",
+                "In the middle of difficulty lies opportunity.",
+                "Actions speak louder than words in most situations.",
+                "A journey of a thousand miles begins today.",
+                "Every cloud has a silver lining if you look.",
+                "Practice makes perfect when learning a new skill.",
+                "Do not count your chickens before they hatch."
         };
         Random random = new Random();
         return prompts[random.nextInt(prompts.length)];
@@ -193,7 +206,8 @@ public class TypingSpeedCalculator extends JFrame {
     private void saveTypingSpeed(double speed) {
         // Save typing speed data to the database
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO typing_speed (speed) VALUES (?)")) {
+                PreparedStatement preparedStatement = connection
+                        .prepareStatement("INSERT INTO typing_speed (speed) VALUES (?)")) {
             preparedStatement.setDouble(1, speed);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -205,13 +219,14 @@ public class TypingSpeedCalculator extends JFrame {
         // Retrieve and display past typing speed scores from the database
         StringBuilder scores = new StringBuilder();
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-            Statement statement = connection.createStatement()) {
+                Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT speed, test_date FROM typing_speed");
 
             while (resultSet.next()) {
                 double speed = resultSet.getDouble("speed");
                 Date testDate = resultSet.getDate("test_date");
-                scores.append("Speed: ").append(String.format("%.2f", speed)).append(" WPM, Date: ").append(testDate).append("\n");
+                scores.append("Speed: ").append(String.format("%.2f", speed)).append(" WPM, Date: ").append(testDate)
+                        .append("\n");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -221,7 +236,8 @@ public class TypingSpeedCalculator extends JFrame {
         scoresTextArea.setText(scores.toString());
         scoresTextArea.setEditable(false);
 
-        JOptionPane.showMessageDialog(this, new JScrollPane(scoresTextArea), "Past Typing Speed Scores", JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(this, new JScrollPane(scoresTextArea), "Past Typing Speed Scores",
+                JOptionPane.PLAIN_MESSAGE);
     }
 
     public static void main(String[] args) {
